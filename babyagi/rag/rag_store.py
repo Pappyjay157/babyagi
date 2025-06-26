@@ -4,15 +4,10 @@ import tiktoken
 import numpy as np
 from typing import List, Tuple
 from openai import OpenAI
-<<<<<<< HEAD
 from dotenv import load_dotenv
 
 load_dotenv()
 client = OpenAI()
-=======
-
-client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
->>>>>>> 1d2a2bfb0733e89ad3b9d1f267f570927de6e9d2
 
 embedding_dim = 1536
 index = faiss.IndexFlatL2(embedding_dim)
@@ -55,12 +50,8 @@ def store_document_chunks(text: str):
 
 def query_similar_chunks(question: str, k: int = 5) -> List[Tuple[str, float]]:
     question_embedding = embed_text([question])[0]
-<<<<<<< HEAD
     query_array = np.array([question_embedding], dtype="float32")
     if index.ntotal == 0:
         return []
     D, I = index.search(query_array, k)
-=======
-    D, I = index.search(np.array([question_embedding], dtype="float32"), k)
->>>>>>> 1d2a2bfb0733e89ad3b9d1f267f570927de6e9d2
     return [(stored_chunks[i], float(D[0][j])) for j, i in enumerate(I[0]) if i < len(stored_chunks)]

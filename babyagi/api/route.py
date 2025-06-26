@@ -1,5 +1,4 @@
 # babyagi/api/route.py
-<<<<<<< HEAD
 from flask import Blueprint, request, jsonify
 from werkzeug.utils import secure_filename
 from babyagi.rag.rag_store import store_document_chunks, query_similar_chunks
@@ -10,18 +9,6 @@ api = Blueprint("student_api", __name__, url_prefix="/api")
 
 # Add Open api key
 client = OpenAI()
-=======
-
-from flask import Blueprint, request, jsonify
-from werkzeug.utils import secure_filename
-from babyagi.rag.rag_store import store_document_chunks, query_similar_chunks
-from openai import OpenAI
-import os
-
-api = Blueprint("student_api", __name__, url_prefix="/api")
-
-client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
->>>>>>> 1d2a2bfb0733e89ad3b9d1f267f570927de6e9d2
 
 # 📤 Route to upload and embed notes
 @api.route("/upload", methods=["POST"])
@@ -30,13 +17,9 @@ def upload_notes():
         return jsonify({"error": "No file uploaded"}), 400
 
     file = request.files["file"]
-<<<<<<< HEAD
     filename = secure_filename(file.filename or "")
     if not filename:
         return jsonify({"error": "Invalid file name"}), 400
-=======
-    filename = secure_filename(file.filename)
->>>>>>> 1d2a2bfb0733e89ad3b9d1f267f570927de6e9d2
 
     if not filename.endswith(".txt"):
         return jsonify({"error": "Only .txt files are supported"}), 400
@@ -75,17 +58,12 @@ def ask_question():
                 }
             ]
         )
-<<<<<<< HEAD
         content = completion.choices[0].message.content
         answer = content.strip() if content is not None else "No answer generated."
-=======
-        answer = completion.choices[0].message.content.strip()
->>>>>>> 1d2a2bfb0733e89ad3b9d1f267f570927de6e9d2
         return jsonify({"answer": answer})
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-<<<<<<< HEAD
 
 @api.route("/task", methods=["POST"])
 def run_task():
@@ -120,5 +98,3 @@ def run_task():
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-=======
->>>>>>> 1d2a2bfb0733e89ad3b9d1f267f570927de6e9d2
