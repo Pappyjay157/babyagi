@@ -70,29 +70,55 @@ def run_task():
     data = request.json
     if not data:
         return jsonify({"error": "Missing JSON in request body"}), 400
-    task_type = data.get("task_type")
-    input_text = data.get("input_text")
 
-    if not task_type or not input_text:
-        return jsonify({"error": "Missing task_type or input_text"}), 400
+    task_type = data.get("task_type", "draft").lower()
+    input_text = data.get("input_text", "")
+    tone = data.get("tone", "formal")
+    reference_style = data.get("reference_style", "APA")
+
+    if not input_text:
+        return jsonify({"error": "Missing input_text"}), 400
 
     try:
-        # Build dynamic prompt based on task type
-        prompt = {
-            "summarize": f"Summarize the following text:\n\n{input_text}",
-            "draft": f"Draft a student-friendly explanation for:\n\n{input_text}",
-            "answer": f"Answer the following question:\n\n{input_text}",
-        }.get(task_type.lower(), f"Please process the following task:\n\n{input_text}")
+        # Custom prompt for drafts
+        if task_type == "draft" or task_type == "essay":
+            prompt = f"""Write a structured academic draft on the topic below using appropriate headings and subheadings.
+
+        Topic: {input_text}
+
+        - Tone: {tone}
+        - Reference Style: {reference_style}
+
+        Format the result in this style:
+
+        1. Title
+        2. Introduction
+        3. Main Sections (2–4 with headings)
+        4. Conclusion
+
+        Respond in a clean markdown-style format so it can be parsed on mobile."""
+        else:
+            # Generic prompt for other tasks
+            prompt = {
+                "summarize": f"Summarize the following text:\n\n{input_text}",
+                "answer": f"Answer the following question:\n\n{input_text}"
+            }.get(task_type, f"Process the task:\n\n{input_text}")
 
         completion = client.chat.completions.create(
             model="gpt-4",
             messages=[
-                {"role": "system", "content": "You are a helpful AI assistant for students."},
-                {"role": "user", "content": prompt}
+                {
+                    "role": "system",
+                    "content": "You are a helpful AI assistant that writes clear and structured academic content for students."
+                },
+                {
+                    "role": "user",
+                    "content": prompt
+                }
             ]
         )
 
-        content = completion.choices[0].message.content
+        content = completion.choices[0].message.content if (completion.choices and completion.choices[0].message.content is not None) else None
         result = content.strip() if content is not None else "No result generated."
         return jsonify({"result": result})
 
